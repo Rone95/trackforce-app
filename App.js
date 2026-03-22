@@ -1,71 +1,52 @@
-import React, { useEffect, useState } from 'react';
-import { Text, View, Button } from 'react-native';
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import Geolocation from 'react-native-geolocation-service';
-import PushNotification from 'react-native-push-notification';
+import React, { useState } from 'react';
+import { firebase } from './firebase';
 
-const firebaseConfig = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_AUTH_DOMAIN',
-  projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_STORAGE_BUCKET',
-  messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-  appId: 'YOUR_APP_ID'
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-const TrackForce = () => {
-  const [location, setLocation] = useState(null);
+const App = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    const subscribeToLocationUpdates = () => {
-      Geolocation.watchPosition(
-        (position) => {
-          setLocation(position);
-          // Save position to your database or state
-          console.log('Location:', position);
-          showAlert('Location updated!', 'New location received.');
-        },
-        (error) => {
-          console.error(error);
-        },
-        { enableHighAccuracy: true, interval: 10000, fastestInterval: 5000, distanceFilter: 10 }
-      );
-    };
-
-    subscribeToLocationUpdates();
-
-    return () => { Geolocation.stopObserving(); };
-  }, []);
-
-  const showAlert = (title, message) => {
-    PushNotification.localNotification({
-      title: title,
-      message: message,
-    });
-  };
-
-  const handleSignIn = async () => {
+  const handleLogin = async () => {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, 'user@example.com', 'password');
+      const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
       setUser(userCredential.user);
-      console.log('User signed in:', userCredential.user);
     } catch (error) {
-      console.error('Error signing in:', error);
+      console.error("Login error: ", error.message);
     }
   };
 
+  const handleRegister = async () => {
+    try {
+      const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+      setUser(userCredential.user);
+    } catch (error) {
+      console.error("Registration error: ", error.message);
+    }
+  };
+
+  const handleLogout = async () => {
+    await firebase.auth().signOut();
+    setUser(null);
+  };
+
   return (
-    <View>
-      <Text>TrackForce App</Text>
-      {user ? <Text>Welcome {user.email}</Text> : <Button title="Sign In" onPress={handleSignIn} />}
-      {location && <Text>Location: {JSON.stringify(location)}</Text>}
-    </View>
+    <div>
+      <h1>Firebase Auth Example</h1>
+      {user ? (
+        <div>
+          <h2>Welcome, {user.email}</h2>
+          <button onClick={handleLogout}>Logout</button>
+        </div>
+      ) : (
+        <div>
+          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <button onClick={handleLogin}>Login</button>
+          <button onClick={handleRegister}>Register</button>
+        </div>
+      )}
+    </div>
   );
 };
 
-export default TrackForce;
+export default App;
