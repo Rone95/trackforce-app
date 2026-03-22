@@ -1,0 +1,1 @@
+{\n  \"expo\": {\n    \"android\": {\n      \"permissions\": [\n        \"ACCESS_FINE_LOCATION\",\n        \"ACCESS_COARSE_LOCATION\",\n        \"FOREGROUND_SERVICE\",\n        \"RECEIVE_BOOT_COMPLETED\"\n      ]\n    }\n  }\n}
