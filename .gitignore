@@ -1,0 +1,19 @@
+# Ignore node_modules
+node_modules/
+
+# Ignore Expo files
+.expo/
+
+# Ignore Android files
+android/
+
+# Ignore iOS files
+ios/
+
+# Ignore Firebase config
+firebase.json
+
+# Ignore IDE files
+*.iml
+*.idea/
+*.vscode/
